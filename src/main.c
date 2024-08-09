@@ -62,28 +62,24 @@ int main()
     JOY_init();
     JOY_setEventHandler(&joyEvent);
 
+    PAL_setColors(0, palette_black, 64, DMA);
+
     SPR_init();
 
     u16 pallete_full[64] = {0};
 
     u16 pallete_0_full[16];
     memcpy(&pallete_0_full[0], logo.palette->data, 16 * 2);
-    PAL_setPalette(PAL0, logo.palette->data, DMA);
-    PAL_setPaletteColors(0, palette_black, DMA);
-    VDP_drawImage(BG_B, &logo, 10, 10);
+    //PAL_setPalette(PAL0, logo.palette->data, DMA);
+    //PAL_setColors(0, palette_black, 16, DMA);
 
     u16 pallete_2_full[16];
     memcpy(&pallete_2_full[0], paddle.palette->data, 16 * 2);
-    for(u16 i = 0; i < sizeof(pallete_2_full) / sizeof(pallete_2_full[0]); ++i)
-    {
-        KLog_S1("p2 = ", pallete_2_full[i]);
-    }
 
-    PAL_setPaletteColors(0, palette_black, DMA);
-    PAL_setPalette(PAL2, paddle.palette->data, DMA);
+    //PAL_setColors(32, palette_black, 16, DMA);
+    //PAL_setPalette(PAL2, paddle.palette->data, DMA);
     paddlePlayer = SPR_addSprite(&paddle, player_x_pos, player_x_pos, TILE_ATTR(PAL2, false, false, false));
     //SPR_setPosition(paddlePlayer, player_x_pos, player_y_pos);
-    SPR_update();
 
     for(u16 i = 0; i < sizeof(pallete_full) / sizeof(pallete_full[0]); ++i)
     {
@@ -98,16 +94,20 @@ int main()
         {
             pallete_full[i] = pallete_2_full[i - 32];
             //KLog_S1("p2 ", pallete_2_full[i]);
-            KLog_S1("p2 ", pallete_2_full[i - 32]);
+            //KLog_S1("p2 ", pallete_2_full[i - 32]);
         }
         else
         {
             pallete_full[i] = palette_black;
         }
 
-        KLog_S2("i = ", i, " pallete_full ", pallete_full[i]);
+        //KLog_S2("i = ", i, " pallete_full ", pallete_full[i]);
     }
 
+    VDP_drawImage(BG_B, &logo, 10, 10);
+    SPR_update();
+
+    PAL_setColors(0, palette_black, 64, DMA);
     PAL_fadeIn(0, 63, pallete_full, 100, FALSE);
     //waitMs(1000);
     //PAL_fadeOut(0, 63, 100, false);
