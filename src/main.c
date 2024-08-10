@@ -64,10 +64,14 @@ static void initState(State* requestedState)
     switch (*(requestedState->currentState))
     {
     case SplashState:
+        if(!XGM2_isPlaying())
+        {
+            XGM2_play(music);
+        }
         VDP_drawImage(BG_B, &logo, 10, 10);
-        XGM2_play(music);
         break;
     case MainMenuState:
+        PAL_setColor(15, RGB24_TO_VDPCOLOR(0xff0000));
         VDP_drawText("Play", 10, 10);
         VDP_drawText("Option", 10, 12);
         break;
@@ -99,7 +103,14 @@ static void clearState(State* requestedState)
     //clear everyting in screen
     VDP_clearPlane(BG_B, TRUE);
     VDP_clearPlane(BG_A, TRUE);
-    VDP_clearSprites();
+    //VDP_clearPlane(WINDOW, TRUE);
+    //VDP_clearSprites();
+    //SPR_clear();
+    SPR_reset();
+    //VDP_releaseAllSprites();
+    //VDP_releaseSprites(0, SAT_MAX_SIZE);
+    VDP_resetScreen();
+    //VRAM_clearRegion(0);
 
     switch (*(requestedState->currentState))
     {
@@ -111,8 +122,18 @@ static void clearState(State* requestedState)
         break;
     case GamePlayState:
         // clear pointers of sprites
-        free(player);
-        free(ball);
+        if(player)
+        {
+            //SPR_releaseSprite(player->sprite);
+            free(player);
+            player = NULL;
+        }
+        if(ball)
+        {
+            //SPR_releaseSprite(ball->sprite);
+            free(ball);
+            ball = NULL;
+        }
         break;
     case GameOverState:
         break;
@@ -126,17 +147,23 @@ static void updateState(State* requestedState)
     switch (*(requestedState->currentState))
     {
     case SplashState:
-        waitMs(5000);
+        waitMs(3000);
         gameStates = MainMenuState;
         changeState(gameStates);
         break;
     case MainMenuState:
+        waitMs(3000);
+        gameStates = GamePlayState;
+        changeState(gameStates);
         break;
     case OptionMenuState:
         break;
     case GamePlayState:
         movePlayer();
         moveBall();
+        waitMs(3000);
+        gameStates = SplashState;
+        changeState(gameStates);
         break;
     case GameOverState:
         break;
