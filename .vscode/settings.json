@@ -4,5 +4,8 @@
     "D:/ModernCpp/SGDK/SGDK-master\\res",
     "res",
     "inc"
-]
+],
+"files.associations": {
+    "resourses.h": "c"
+}
 }
