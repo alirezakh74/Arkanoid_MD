@@ -2,21 +2,24 @@
 #include <resourses.h>
 
 const u16 LEFT_EDGE = 0;
-const int RIGHT_EDGE = 320;
-const int TOP_EDGE = 0;
-const int BOTTOM_EDGE = 224;
+const u16 RIGHT_EDGE = 320;
+const u16 TOP_EDGE = 0;
+const u16 BOTTOM_EDGE = 224;
 
 s16 player_x_pos = 200;
-const s16 player_y_pos = 200;
+const s16 PLYER_Y_POS = 200;
 const u16 PLAYER_SPEED = 10;
-u16 player_x_velocity = 0;
-u16 player_width = 48;
-u16 player_hight = 16;
+s16 player_x_velocity = 0;
+u16 PLAYER_WIDTH = 48;
+u16 PLAYER_HEIGHT = 16;
 
-u16 ball_x_pos = 200;
-u16 ball_y_pos = 200;
-u16 ball_x_vellocity = 0;
-u16 ball_y_vellocity = 0;
+s16 ball_x_pos = 200;
+s16 ball_y_pos = 200;
+const u16 BALL_SPEED = 5;
+s16 ball_x_vellocity = 0;
+s16 ball_y_vellocity = 0;
+const u16 BALL_WIDTH = 16;
+const u16 BALL_HEIGHT = 16;
 
 typedef struct
 {
@@ -68,7 +71,7 @@ static void initState(State* requestedState)
         {
             XGM2_play(music);
         }
-        VDP_drawImage(BG_B, &logo, 10, 10);
+        VDP_drawImage(BG_B, &logo_image, 10, 10);
         break;
     case MainMenuState:
         PAL_setColor(15, RGB24_TO_VDPCOLOR(0xff0000));
@@ -88,6 +91,8 @@ static void initState(State* requestedState)
         ball = (GameObject*)malloc(sizeof(GameObject));
         ball->sprite = SPR_addSprite(&ball_image, player_x_pos-48, player_x_pos-48, TILE_ATTR(PAL2, false, false, false));
         ball->active = TRUE;
+        ball_x_vellocity = BALL_SPEED;
+        ball_y_vellocity = -BALL_SPEED;
         break;
     case GameOverState:
         VDP_drawText("Game Over!", 10, 10);
@@ -101,16 +106,16 @@ static void initState(State* requestedState)
 static void clearState(State* requestedState)
 {
     //clear everyting in screen
-    VDP_clearPlane(BG_B, TRUE);
-    VDP_clearPlane(BG_A, TRUE);
+    //VDP_clearPlane(BG_B, TRUE);
+    //VDP_clearPlane(BG_A, TRUE);
     //VDP_clearPlane(WINDOW, TRUE);
     //VDP_clearSprites();
     //SPR_clear();
-    SPR_reset();
     //VDP_releaseAllSprites();
     //VDP_releaseSprites(0, SAT_MAX_SIZE);
-    VDP_resetScreen();
     //VRAM_clearRegion(0);
+    SPR_reset();
+    VDP_resetScreen();
 
     switch (*(requestedState->currentState))
     {
@@ -161,9 +166,9 @@ static void updateState(State* requestedState)
     case GamePlayState:
         movePlayer();
         moveBall();
-        waitMs(3000);
-        gameStates = SplashState;
-        changeState(gameStates);
+        //waitMs(3000);
+        //gameStates = SplashState;
+        //changeState(gameStates);
         break;
     case GameOverState:
         break;
@@ -210,17 +215,48 @@ void movePlayer()
         player_x_pos = LEFT_EDGE;
     }
 
-	if(player_x_pos + player_width > RIGHT_EDGE)
+	if(player_x_pos + PLAYER_WIDTH > RIGHT_EDGE)
     {
-        player_x_pos = RIGHT_EDGE - player_width + 8;
+        player_x_pos = RIGHT_EDGE - PLAYER_WIDTH + 8;
     }
-    SPR_setPosition(&player->sprite, player_x_pos, player_y_pos);
+    SPR_setPosition(&player->sprite, player_x_pos, PLYER_Y_POS);
     //KLog_S1("player y pos = ", player_x_pos);
 }
 
 void moveBall()
 {
+    //s16 x_pos = SPR_getPositionX(ball->sprite);
+    //s16 y_pos = SPR_getPositionY(ball->sprite);
 
+    ball_x_pos += ball_x_vellocity;
+    ball_y_pos += ball_y_vellocity;
+
+    SPR_setPosition(ball->sprite, ball_x_pos, ball_y_pos);
+
+    if(ball_x_pos <= LEFT_EDGE)
+    {
+        SPR_setPosition(ball->sprite, LEFT_EDGE + 2, ball_y_pos);
+        ball_x_vellocity = BALL_SPEED;
+    }
+    else if(ball_x_pos >= RIGHT_EDGE)
+    {
+        SPR_setPosition(ball->sprite, RIGHT_EDGE - BALL_WIDTH - 2, ball_y_pos);
+        ball_x_vellocity = -BALL_SPEED;
+    }
+
+    if(ball_y_pos <= TOP_EDGE)
+    {
+        SPR_setPosition(ball->sprite, ball_x_pos, TOP_EDGE + 2);
+        ball_y_vellocity = BALL_SPEED;
+    }
+    else if(ball_y_pos >= BOTTOM_EDGE)
+    {
+        SPR_setPosition(ball->sprite, ball_x_pos, BOTTOM_EDGE - BALL_HEIGHT - 2);
+        ball_y_vellocity = -BALL_SPEED;
+    }
+
+    KLog_S1("ball velocity x = ", ball_x_vellocity);
+    KLog_S1("ball velocity y = ", ball_y_vellocity);
 }
 
 int main()
@@ -246,7 +282,7 @@ int main()
 
     //PAL_setColors(32, palette_black, 16, DMA);
     //PAL_setPalette(PAL2, paddle.palette->data, DMA);
-    //SPR_setPosition(paddlePlayer, player_x_pos, player_y_pos);
+    //SPR_setPosition(paddlePlayer, player_x_pos, PLYER_Y_POS);
 
     // for(u16 i = 0; i < sizeof(pallete_full) / sizeof(pallete_full[0]); ++i)
     // {
